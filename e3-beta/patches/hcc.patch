@@ -1,0 +1,69 @@
+initial patch that makes hcc to compile hcode without Raven calling convention
+
+Index: utils/hcc/expr.c
+===================================================================
+--- utils/hcc/expr.c	(revision 5233)
++++ utils/hcc/expr.c	(working copy)
+@@ -422,23 +422,23 @@ static def_t *ParseFunctionCall (def_t *
+ 			}
+ 
+ 			def_parms[argCount].type = t->parm_types[argCount];
+-			if (argCount < 2)
++			//if (argCount < 2)
++			//{
++			//	args[argCount] = e;
++			//}
++			//else
+ 			{
+-				args[argCount] = e;
+-			}
+-			else
+-			{
+-				if (t->parm_types[argCount] == NULL ||		// Variable args
+-				    t->parm_types[argCount]->type == ev_vector)
+-				{
++				//if (t->parm_types[argCount] == NULL ||		// Variable args
++				//    t->parm_types[argCount]->type == ev_vector)
++				//{
+ 					CO_GenCode(&pr_opcodes[OP_STORE_V], e,
+ 							&def_parms[argCount]);
+-				}
+-				else
+-				{
+-					CO_GenCode(&pr_opcodes[OP_STORE_F], e,
+-							&def_parms[argCount]);
+-				}
++				//}
++				//else
++				//{
++				//	CO_GenCode(&pr_opcodes[OP_STORE_F], e,
++				//			&def_parms[argCount]);
++				//}
+ 			}
+ 			argCount++;
+ 		} while (TK_CHECK(TK_COMMA));
+@@ -450,7 +450,7 @@ static def_t *ParseFunctionCall (def_t *
+ 		PR_ParseError("too few parameters");
+ 	}
+ 
+-	CO_GenCodeDirect(&pr_opcodes[OP_CALL0+argCount], func, args[0], args[1]);
++	CO_GenCodeDirect(&pr_opcodes[OP_CALL0+argCount], func, NULL, NULL/*args[0], args[1]*/);
+ 
+ 	ex_FunctionCallCount++;
+ 
+@@ -603,6 +603,7 @@ static def_t *ParseIntrinsicFunc (const 
+ {
+ 	def_t	*expr1, *expr2;
+ 
++#if 0
+ 	if (strcmp(name, "random") == 0)
+ 	{
+ 		LX_Require("(");
+@@ -636,6 +637,7 @@ static def_t *ParseIntrinsicFunc (const 
+ 		def_ret.type = &type_float;
+ 		return &def_ret;
+ 	}
++#endif
+ 
+ 	if (strcmp(name, "randomv") == 0)
+ 	{

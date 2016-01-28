@@ -1,0 +1,186 @@
+initial patch that makes dhcc to decompile progs.dat from hexen2 E3-beta version
+and also makes it to compile without Raven calling convention.
+
+Index: utils/dcc/dcc.c
+===================================================================
+--- utils/dcc/dcc.c	(revision 5233)
++++ utils/dcc/dcc.c	(working copy)
+@@ -380,51 +380,54 @@
+ 	{
+ 		nargs = s->op - OP_CALL0;
+ 
+-		arg1 = PR_PrintStringAtOfs(s->a, typ1);
++		arg1 = PR_PrintStringAtOfs(s->a, /*typ1*/NULL);
+ 		if (arg1)
+ 			strcpy(a1, arg1);
+ 	//	printf("fname: %s %s\n", a1, arg1);
+ 
+-		arg2 = PR_PrintStringAtOfs(s->b, typ2);
+-		if (arg2)
+-			strcpy(a2, arg2);
++		//arg2 = PR_PrintStringAtOfs(s->b, typ2);
++		//if (arg2)
++		//	strcpy(a2, arg2);
+ 
+-		arg3 = PR_PrintStringAtOfs(s->c, typ3);
++		//arg3 = PR_PrintStringAtOfs(s->c, typ3);
+ 		sprintf(dsline, "%s (", a1);
+ 		sprintf(funcname, "%s", a1);
+-		if (arg2)
+-		{
+-			strcat(dsline, " ");
+-			strcat(dsline, a2);
+-			i++;
+-		}
++		//if (arg2)
++		//{
++		//	strcat(dsline, " ");
++		//	strcat(dsline, a2);
++		//	i++;
++		//}
+ 
+-		if (arg3 && nargs > 1)
+-		{
+-			size_t	len = strlen(arg3);
+-			strcat(dsline, ", ");
+-			strcat(dsline, arg3);
+-			if (!strcmp(funcname, "WriteCoord") || !strcmp(funcname, "WriteAngle"))
+-			{
+-				if (len >= 2)
+-				{
+-					len -= 2;
+-					if (strcmp(&arg3[len], "_x") &&
+-						!(!strcmp(&arg3[len], "_y") ||
+-						  !strcmp(&arg3[len], "_z") ||
+-						  !strcmp(&arg3[len+1], ")")))
+-					    strcat(dsline, "_x");
+-				}
+-			}
+-		}
++		//if (arg3 && nargs > 1)
++		//{
++		//	size_t	len = strlen(arg3);
++		//	strcat(dsline, ", ");
++		//	strcat(dsline, arg3);
++		//	if (!strcmp(funcname, "WriteCoord") || !strcmp(funcname, "WriteAngle"))
++		//	{
++		//		if (len >= 2)
++		//		{
++		//			len -= 2;
++		//			if (strcmp(&arg3[len], "_x") &&
++		//				!(!strcmp(&arg3[len], "_y") ||
++		//				  !strcmp(&arg3[len], "_z") ||
++		//				  !strcmp(&arg3[len+1], ")")))
++		//			    strcat(dsline, "_x");
++		//		}
++		//	}
++		//}
+ 
+-		for (i = 2; i < nargs; i++)
++		//for (i = 2; i < nargs; i++)
++		for (i = 0; i < nargs; i++)
+ 		{
+-			strcat(dsline, ", ");
+-			arg2 = Get_Immediate(OFS_PARM0 + (i * 3));
++			//strcat(dsline, ", ");
++			//arg2 = Get_Immediate(OFS_PARM0 + (i * 3));
++			arg2 = PR_PrintStringAtOfs(OFS_PARM0 + (i * 3), NULL);
+ 			if (!arg2)
+ 				continue;
+ 			strcat(dsline, arg2);
++			if (i<nargs-1) strcat(dsline, ", ");
+ 		}
+ 
+ 		strcat(dsline, ")");
+Index: utils/dcc/pr_comp.c
+===================================================================
+--- utils/dcc/pr_comp.c	(revision 4860)
++++ utils/dcc/pr_comp.c	(working copy)
+@@ -409,21 +409,21 @@
+ 				PR_ParseError ("type mismatch on parm %i", arg);
+ 		// a vector copy will copy everything
+ 			def_parms[arg].type = t->parm_types[arg];
+-			if (arg == 0)
+-			{
+-				a1 = e;
+-			}
+-			else if (arg == 1)
+-			{
+-				a2 = e;
+-			}
+-			else
+-			{
+-				if (e->type->type == ev_vector)
++			//if (arg == 0)
++			//{
++			//	a1 = e;
++			//}
++			//else if (arg == 1)
++			//{
++			//	a2 = e;
++			//}
++			//else
++			//{
++			//	if (e->type->type == ev_vector)
+ 					PR_Statement (&pr_opcodes[OP_STORE_V], e, &def_parms[arg]);
+-				else
+-					PR_Statement (&pr_opcodes[OP_STORE_F], e, &def_parms[arg]);
+-			}
++			//	else
++			//		PR_Statement (&pr_opcodes[OP_STORE_F], e, &def_parms[arg]);
++			//}
+ 			arg++;
+ 		} while (PR_Check (","));
+ 
+@@ -435,16 +435,16 @@
+ 	if (arg > 8)
+ 		PR_ParseError ("More than eight parameters");
+ 
+-	statement = &statements[numstatements];
+-	numstatements++;
++//	statement = &statements[numstatements];
++//	numstatements++;
+ 
+-	statement_linenums[statement-statements] = pr_source_line;
+-	statement->op = OP_CALL0 + arg;
+-	statement->a = func ? func->ofs : 0;
+-	statement->b = a1 ? a1->ofs : 0;
+-	statement->c = a2 ? a2->ofs : 0;
++//	statement_linenums[statement-statements] = pr_source_line;
++//	statement->op = OP_CALL0 + arg;
++//	statement->a = func ? func->ofs : 0;
++//	statement->b = a1 ? a1->ofs : 0;
++//	statement->c = a2 ? a2->ofs : 0;
+ 
+-//	PR_Statement (&pr_opcodes[OP_CALL0+arg], func, NULL);
++	PR_Statement (&pr_opcodes[OP_CALL0+arg], func, NULL);
+ 
+ 	def_ret.type = t->aux_type;
+ 	return &def_ret;
+@@ -455,6 +455,7 @@
+ PR_ParseRandom
+ =============
+ */
++#if 0
+ static def_t *PR_ParseRandom (void)
+ {
+ 	def_t		*e = NULL, *e2 = NULL;
+@@ -500,6 +501,7 @@
+ 	def_ret.type = def_float.type;
+ 	return &def_ret;
+ }
++#endif
+ 
+ /*
+ ============
+@@ -581,8 +583,10 @@
+ 
+ 	if (priority == 0)
+ 		return PR_Term ();
++#if 0
+ 	if (priority == 1 && PR_Check ("random"))
+ 		return PR_ParseRandom();
++#endif
+ 
+ 	e = PR_Expression (priority-1);
+ 
