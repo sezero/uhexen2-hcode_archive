@@ -10,6 +10,8 @@ Hammer of Thyrion, therefore I am sharing them.
 
 * h2-0.42-demo	 HexenC source for Hexen II demo v0.42 from Aug. 1997
 * h2-1.03	 HexenC source for Hexen II retail version (PC CD-ROM)
+* h2-1.08	 HexenC source for Hexen II v1.08 (from Matrox m3D cd
+				a.k.a. Continent of Blackmarsh, v1.08)
 * h2-1.09	 HexenC source for Hexen II v1.09 update
 * h2-1.10	 HexenC source for Hexen II v1.10 (from Matrox m3D cd
 				a.k.a. Continent of Blackmarsh, v1.10)
@@ -21,14 +23,14 @@ Hammer of Thyrion, therefore I am sharing them.
 * e3-beta	 HexenC source code for E3-beta version of Hexen II.
 				(See e3-beta/README.txt for details.)
 
-I don't have access to 1.08 version, the original Matrox m3D bundled
-version of Hexen II, a.k.a. Continent of Blackmarsh.  Therefore that
-information is missing here.
-
 Diff outputs between several versions:
 * h2-v0.42-demo_to_h2-v1.03.diff
+* h2-v1.03_to_h2-v1.08.diff
 * h2-v1.03_to_h2-v1.09.diff
 * h2-v1.03_to_h2-v1.11.diff
+* h2-v1.08_to_h2-v1.09.diff
+* h2-v1.08_to_h2-v1.10.diff
+* h2-v1.08_to_h2-v1.11.diff
 * h2-v1.09_to_h2-v1.10.diff
 * h2-v1.09_to_h2-v1.11.diff
 * h2-v1.10_to_h2-v1.11.diff
